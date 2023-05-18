@@ -1,15 +1,14 @@
 package com.piyal.url_shortener.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class UrlModelDto {
-    String shortUrl;
-    String regularUrl;
-    public UrlModelDto(String shortUrl, String regularUrl){
-        this.shortUrl = shortUrl;
-        this.regularUrl = regularUrl;
-    }
+	String regularUrl;
 }

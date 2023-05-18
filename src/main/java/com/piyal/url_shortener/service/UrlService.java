@@ -1,6 +1,7 @@
 package com.piyal.url_shortener.service;
 
 import com.piyal.url_shortener.dto.UrlModelDto;
+import com.piyal.url_shortener.helper.Base62Helper;
 import com.piyal.url_shortener.model.UrlModel;
 import com.piyal.url_shortener.repository.UrlRepository;
 import org.springframework.http.ResponseEntity;
@@ -9,22 +10,27 @@ import org.springframework.web.servlet.view.RedirectView;
 
 @Service
 public class UrlService {
-    UrlRepository urlRepository;
-    UrlService(UrlRepository urlRepository){
-        this.urlRepository = urlRepository;
-    }
-
-    public RedirectView redirectToActualSite(String shortUrl){
-        UrlModel urlModel = urlRepository.findByShortUrl(shortUrl);
-        if(urlModel == null){
-            return new RedirectView();
-        }
-        return new RedirectView(urlModel.getRegularUrl());
-    }
-
-    public ResponseEntity<UrlModel> addUrl(UrlModelDto urlModelDto){
-        UrlModel urlModel = new UrlModel(urlModelDto);
-        urlRepository.save(urlModel);
-        return ResponseEntity.ok(urlModel);
-    }
+	UrlRepository urlRepository;
+	
+	UrlService(UrlRepository urlRepository) {
+		this.urlRepository = urlRepository;
+	}
+	
+	public RedirectView redirectToActualSite(String shortUrl) {
+		Long id = Base62Helper.decodeFromBase62(shortUrl);
+		UrlModel urlModel = urlRepository.findById(id).orElse(null);
+		if (urlModel == null) {
+			return new RedirectView();
+		}
+		return new RedirectView(urlModel.getRegularUrl());
+	}
+	
+	public ResponseEntity<UrlModel> addUrl(UrlModelDto urlModelDto) {
+		UrlModel urlModel = new UrlModel(urlModelDto);
+		urlModel.setShortUrl(Base62Helper.encodeToBase62(urlModel.getId()));
+		urlRepository.save(urlModel);
+		return ResponseEntity.ok(urlModel);
+	}
+	
+	
 }
