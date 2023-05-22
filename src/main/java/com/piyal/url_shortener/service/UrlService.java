@@ -4,9 +4,9 @@ import com.piyal.url_shortener.dto.UrlModelDto;
 import com.piyal.url_shortener.helper.Base62Helper;
 import com.piyal.url_shortener.model.UrlModel;
 import com.piyal.url_shortener.repository.UrlRepository;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.view.RedirectView;
 
 @Service
 public class UrlService {
@@ -16,13 +16,15 @@ public class UrlService {
 		this.urlRepository = urlRepository;
 	}
 	
-	public RedirectView redirectToActualSite(String shortUrl) {
+	@Cacheable(value = "shortUrlCache", key = "#shortUrl")
+	public String getRegularUrl(String shortUrl) {
 		Long id = Base62Helper.decodeFromBase62(shortUrl);
 		UrlModel urlModel = urlRepository.findById(id).orElse(null);
+		System.out.println("Fetched from database.");
 		if (urlModel == null) {
-			return new RedirectView();
+			return "";
 		}
-		return new RedirectView(urlModel.getRegularUrl());
+		return urlModel.getRegularUrl();
 	}
 	
 	public ResponseEntity<UrlModel> addUrl(UrlModelDto urlModelDto) {

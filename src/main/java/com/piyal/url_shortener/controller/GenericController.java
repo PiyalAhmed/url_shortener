@@ -5,6 +5,7 @@ import com.piyal.url_shortener.model.UrlModel;
 import com.piyal.url_shortener.service.UrlService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,9 +25,14 @@ public class GenericController {
 	}
 	
 	@GetMapping("/{shortUrl}")
-	RedirectView redirectToActualSite(@PathVariable String shortUrl) {
+	Object redirectToActualSite(@PathVariable String shortUrl) {
 		logger.info("Retrieving regular url...");
-		return urlService.redirectToActualSite(shortUrl);
+		String regularUrl = urlService.getRegularUrl(shortUrl);
+		if(regularUrl.isEmpty()){
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+					.body("This url does not exist in our Database!");
+		}
+		return new RedirectView(regularUrl);
 	}
 	
 	
